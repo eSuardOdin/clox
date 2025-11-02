@@ -1,6 +1,7 @@
 #include "chunk.h"
 #include "common.h"
 #include "debug.h"
+#include <cstdio>
 
 int main(int argc, char **argv)
 {
@@ -36,7 +37,6 @@ int main(int argc, char **argv)
         writeConstant(&dbg, (Value)i, line);
     }
     disassembleChunk(&dbg, "debug");
-
 
     // for(int i = 0; i < dbg.constants.count; i++) {
     //     printf("Const: %g | Index: %d\n", dbg.constants.values[i], i);
