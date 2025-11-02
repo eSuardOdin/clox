@@ -5,8 +5,9 @@
 #include "value.h"
 
 typedef enum {
-    OP_CONSTANT,    // 2 bytes : 1 byte opcode & 1 byte Value  
-    OP_RETURN,      // 1 byte  : 1 byte opcode
+    OP_CONSTANT,        // 2 bytes : 1 byte opcode & 1 byte Value  
+    OP_CONSTANT_LONG,   // 4 bytes : 1 byte opcode & 3 byte Value
+    OP_RETURN,          // 1 byte  : 1 byte opcode
 } OpCode;
 
 typedef struct {
@@ -28,6 +29,7 @@ typedef struct {
 void initChunk(Chunk* chunk);
 void freeChunk(Chunk* chunk);
 void writeChunk(Chunk* chunk, uint8_t byte, int line);
+void writeConstant(Chunk* chunk, Value v, int line);
 int addConstant(Chunk* chunk, Value v);
 int getLine(Chunk* chunk, int offset);
 

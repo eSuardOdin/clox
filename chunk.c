@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "chunk.h"
@@ -85,6 +86,40 @@ int getLine(Chunk *chunk, int offset) {
         }
     }
     return -1;
+}
+
+
+/**
+ * @brief Writes a new constant in chunk
+ * chooses opcode between OP_CONSTANT and
+ * OP_CONSTANT_LONG depending on number
+ * of constants already in pool
+ * 
+ * @param chunk The chunk to append constant to
+ * @param v The constant to add
+ * @param line Line of the constant
+ */
+void writeConstant(Chunk* chunk, Value v, int line) {
+    int index = addConstant(chunk, v);
+    // If can be encoded into 1 byte
+    if(index < 0xFF) {
+        writeChunk(chunk, OP_CONSTANT, line);
+        writeChunk(chunk, index, line);
+        printf("Added OP_CONSTANT at index %d.\n", index);
+    } 
+    // If can be encoded into 3 bytes
+    else if(index < 0xFFFFFF) {
+        writeChunk(chunk, OP_CONSTANT_LONG, line);
+        writeChunk(chunk, (uint8_t)(index & 0xFF), line);
+        writeChunk(chunk, (uint8_t)((index >> 8) & 0xFF), line);
+        writeChunk(chunk, (uint8_t)((index >> 16) & 0xFF), line);
+        printf("Added OP_CONSTANT_LONG at index %d.\n", index);
+    }
+    // Else, handle it later ?
+    else {
+        fprintf(stderr, "Too many constants, cannot encode it.\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 
