@@ -1,23 +1,40 @@
 #include "vm.h"
 #include "chunk.h"
 #include "debug.h"
+#include "memory.h"
 #include "value.h"
 #include <stdio.h>
 
 Vm vm;  // Static variable
 
 static void resetStack() {
+    vm.stackCount = 0;
+    vm.stackCapacity = 0;
     vm.stackTop = vm.stack;
 }
 
 Value pop() {
     vm.stackTop--;
+    vm.stackCount--;
     return *vm.stackTop;
 }
 
 void push(Value value) {
+    if(vm.stackCapacity < vm.stackCount + 1) {
+        printf("[GROWING STACK] Old capacity: %d\n", vm.stackCapacity);
+        int oldCapacity = vm.stackCapacity;
+        vm.stackCapacity = GROW_CAPACITY(oldCapacity);
+        vm.stack = GROW_ARRAY(Value, vm.stack, oldCapacity, vm.stackCapacity);
+        // New address for the top stack pointer
+        vm.stackTop = vm.stack + vm.stackCount;
+        printf("[GROWING STACK] New capacity: %d\n", vm.stackCapacity);
+    }
+    printf("[PUSH] Putting: %g at stack[%d]\n", value, (int)(vm.stackTop - vm.stack));
     *vm.stackTop = value;
+    printf("[PUSH] Well ?\n");
+
     vm.stackTop++;
+    vm.stackCount++;
 }
 
 void initVM() {
@@ -79,7 +96,8 @@ static InterpretResult run() {
                 push(constant_long);
                 break;
             case OP_NEGATE:
-                push(-pop());
+                // push(-pop());
+                *(vm.stackTop -1) = -(*(vm.stackTop - 1));
                 break;
             case OP_ADD:            BINARY_OP(+); break;
             case OP_SUBSTRACT:      BINARY_OP(-); break;

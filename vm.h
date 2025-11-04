@@ -4,15 +4,17 @@
 #include "chunk.h"
 #include "value.h"
 
-#define STACK_MAX 256
+#define STACK_INIT 256
 
 typedef struct {
+    int stackCount;
+    int stackCapacity;
     // Chunk the VM is running
     Chunk* chunk;
     // Instruction Pointer (Program Counter)
     uint8_t* ip;
     // Stack to put operators/operandes in
-    Value stack[STACK_MAX];
+    Value* stack;
     // Top a the Value stack (+1)
     Value* stackTop;
 } Vm;
