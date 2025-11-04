@@ -9,28 +9,58 @@ int main(int argc, char **argv)
 
     Chunk chunk;
     initChunk(&chunk);
-    writeConstant(&chunk, 5.5, 123);
-    writeConstant(&chunk, 1.23, 124);
-    // Write the byte for a return instruction
-    writeChunk(&chunk, OP_RETURN, 124);
+    
+    // // --- 1 * 2 + 3 ---
+    // // 1 * 2 
+    // writeConstant(&chunk, 1.0, 1);
+    // writeConstant(&chunk, 2.0, 1);
+    // writeChunk(&chunk, OP_MULTIPLY, 1);
+    // // + 3
+    // writeConstant(&chunk, 3.0, 1);
+    // writeChunk(&chunk, OP_ADD, 1);
+    // writeChunk(&chunk, OP_RETURN, 1);
 
 
+
+    // // --- 1 + 2 * 3 ---
+    // // 2 * 3 
+    // writeConstant(&chunk, 2.0, 2);
+    // writeConstant(&chunk, 3.0, 2);
+    // writeChunk(&chunk, OP_MULTIPLY, 2);
+    // // + 1
+    // writeConstant(&chunk, 1.0, 2);
+    // writeChunk(&chunk, OP_ADD,2);
+    // writeChunk(&chunk, OP_RETURN, 2);
+
+    // --- 1 + 2 * 3 - 4 / -5 ---
+    writeConstant(&chunk, 2.0, 1);
+    //[2]
+    writeConstant(&chunk, 3.0, 1);
+    // [2][3]
+    writeChunk(&chunk, OP_MULTIPLY, 1);
+    // [6]
+
+    writeConstant(&chunk, 4.0, 1);
+    // [6][4]
+    writeConstant(&chunk, 5.0, 1);
+    // [6][4][5]
+    writeChunk(&chunk, OP_NEGATE, 1);
+    // [6][4][-5]
+    writeChunk(&chunk, OP_DIVIDE, 1);
+    // [6][-0.8]
+    writeChunk(&chunk, OP_SUBSTRACT, 1);
+    // [6.8]
+    writeConstant(&chunk, 1.0, 1);
+    // [6.8][1]
+    writeChunk(&chunk, OP_ADD, 1);
+    // [7.8]
+    writeChunk(&chunk, OP_RETURN, 1);
+    
     disassembleChunk(&chunk, "main");
-    freeVM();    
+    
+    interpret(&chunk);
     freeChunk(&chunk);
 
-    // // Chunk to debug constants
-    // Chunk dbg;
-    // initChunk(&dbg);
-    // int line = 0;
-    // for(int i = 0; i < (0xFF + 3); i++) {
-    //     if(!(i % 5)) {
-    //         line++;
-    //     }
-    //     writeConstant(&dbg, (Value)i, line);
-    // }
-    // disassembleChunk(&dbg, "debug");
-    
-
+    freeVM();    
     return 0;
 }

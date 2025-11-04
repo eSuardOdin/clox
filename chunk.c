@@ -7,7 +7,6 @@
 #include "value.h"
 
 void initChunk(Chunk* chunk) {
-    printf("Init chunk\n");
     chunk->byteCount = 0;
     chunk->byteCapacity = 0;
     chunk->lineCount = 0;
@@ -33,12 +32,8 @@ void freeChunk(Chunk* chunk) {
  * @param line Number of the line the byte is in
  */
 void writeChunk(Chunk* chunk, uint8_t byte, int line) {
-    printf("Writing chunk\n");
     // --- Line processing ---
     // If line already in use, add lenght
-    if(chunk-> lineCount > 0) { // Debug
-        printf("Current line is %d, previous is %d\n", line, (chunk->lines[chunk->lineCount - 1]).line);
-    }
     if( chunk->lineCount > 0 && line == (chunk->lines[chunk->lineCount - 1]).line) {
         chunk->lines[chunk->lineCount - 1].lenght++;
     } 
@@ -105,7 +100,6 @@ void writeConstant(Chunk* chunk, Value v, int line) {
     if(index < 0xFF) {
         writeChunk(chunk, OP_CONSTANT, line);
         writeChunk(chunk, index, line);
-        printf("Added OP_CONSTANT at index %d.\n", index);
     } 
     // If can be encoded into 3 bytes
     else if(index < 0xFFFFFF) {
@@ -113,7 +107,6 @@ void writeConstant(Chunk* chunk, Value v, int line) {
         writeChunk(chunk, (uint8_t)(index & 0xFF), line);
         writeChunk(chunk, (uint8_t)((index >> 8) & 0xFF), line);
         writeChunk(chunk, (uint8_t)((index >> 16) & 0xFF), line);
-        printf("Added OP_CONSTANT_LONG at index %d.\n", index);
     }
     // Else, handle it later ?
     else {
