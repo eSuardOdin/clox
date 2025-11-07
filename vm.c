@@ -11,12 +11,9 @@ Vm vm;  // Static variable
 
 static void resetStack() {
     printf("[vm.c][resetStack()] => Entering resetStack()");
-    if(vm.stack == NULL) {
-        vm.stack = (Value*)malloc(STACK_INIT);
-    }
     vm.stackCount = 0;
     vm.stackCapacity = 0;
-    vm.stackTop = vm.stack; // ?
+    vm.stackTop = vm.stack;
 }
 
 Value pop() {
@@ -26,15 +23,15 @@ Value pop() {
 }
 
 void push(Value value) {
-    if(vm.stackCapacity < vm.stackCount + 1) {
-        printf("[GROWING STACK] Old capacity: %d\n", vm.stackCapacity);
-        int oldCapacity = vm.stackCapacity;
-        vm.stackCapacity = GROW_CAPACITY(oldCapacity);
-        vm.stack = GROW_ARRAY(Value, vm.stack, oldCapacity, vm.stackCapacity);
-        // New address for the top stack pointer
-        vm.stackTop = vm.stack + vm.stackCount;
-        printf("[GROWING STACK] New capacity: %d\n", vm.stackCapacity);
-    }
+    // if(vm.stackCapacity < vm.stackCount + 1) {
+    //     printf("[GROWING STACK] Old capacity: %d\n", vm.stackCapacity);
+    //     int oldCapacity = vm.stackCapacity;
+    //     vm.stackCapacity = GROW_CAPACITY(oldCapacity);
+    //     vm.stack = GROW_ARRAY(Value, vm.stack, oldCapacity, vm.stackCapacity);
+    //     // New address for the top stack pointer
+    //     vm.stackTop = vm.stack + vm.stackCount;
+    //     printf("[GROWING STACK] New capacity: %d\n", vm.stackCapacity);
+    // }
     printf("[PUSH] Putting: %g at stack[%d]\n", value, (int)(vm.stackTop - vm.stack));
     *vm.stackTop = value;
     printf("[PUSH] Well ?\n");
@@ -53,16 +50,21 @@ void freeVM() {
 }
 
 InterpretResult interpret(const char* source) {
-    // Debug
-    printf("[vm.c][interpret()] => Entering interpret()");
-    if(!compile(source, vm.chunk)) {
-        freeChunk(vm.chunk);
+    Chunk chunk;
+    initChunk(&chunk);
+
+    if (!compile(source, &chunk)) {
+        freeChunk(&chunk);
         return INTERPRET_COMPILE_ERROR;
     }
 
-    
+    vm.chunk = &chunk;
+    vm.ip = vm.chunk->code;
 
-    return INTERPRET_OK;
+    InterpretResult result = run();
+
+    freeChunk(&chunk);
+    return result;
 }
 
 

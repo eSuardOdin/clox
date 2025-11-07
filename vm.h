@@ -4,7 +4,7 @@
 #include "chunk.h"
 #include "value.h"
 
-#define STACK_INIT 256
+#define STACK_INIT 512
 
 typedef struct {
     int stackCount;
@@ -14,7 +14,7 @@ typedef struct {
     // Instruction Pointer (Program Counter)
     uint8_t* ip;
     // Stack to put operators/operandes in
-    Value* stack;
+    Value stack[STACK_INIT];
     // Top a the Value stack (+1)
     Value* stackTop;
 } Vm;
