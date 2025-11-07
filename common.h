@@ -5,7 +5,11 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
+#define DEBUG_PRINT_CODE
 #define DEBUG_TRACE_EXECUTION
+#define REPL_LINE_CHARS 1024
+
 
 #endif

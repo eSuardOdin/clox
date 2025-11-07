@@ -1,16 +1,22 @@
 #include "vm.h"
+#include "compiler.h"
 #include "chunk.h"
 #include "debug.h"
 #include "memory.h"
 #include "value.h"
+#include <stdlib.h>
 #include <stdio.h>
 
 Vm vm;  // Static variable
 
 static void resetStack() {
+    printf("[vm.c][resetStack()] => Entering resetStack()");
+    if(vm.stack == NULL) {
+        vm.stack = (Value*)malloc(STACK_INIT);
+    }
     vm.stackCount = 0;
     vm.stackCapacity = 0;
-    vm.stackTop = vm.stack;
+    vm.stackTop = vm.stack; // ?
 }
 
 Value pop() {
@@ -38,6 +44,7 @@ void push(Value value) {
 }
 
 void initVM() {
+    printf("[vm.c][initVM()] => Entering initVM()");
     resetStack();
 }
 
@@ -45,10 +52,17 @@ void freeVM() {
 
 }
 
-InterpretResult interpret(Chunk* chunk) {
-    vm.chunk = chunk;
-    vm.ip = vm.chunk->code;
-    return run();
+InterpretResult interpret(const char* source) {
+    // Debug
+    printf("[vm.c][interpret()] => Entering interpret()");
+    if(!compile(source, vm.chunk)) {
+        freeChunk(vm.chunk);
+        return INTERPRET_COMPILE_ERROR;
+    }
+
+    
+
+    return INTERPRET_OK;
 }
 
 

@@ -28,8 +28,8 @@ typedef enum {
 // -- VM functions --
 
 void initVM();
+InterpretResult interpret(const char* source);
 void freeVM();
-InterpretResult interpret(Chunk* chunk);
 static InterpretResult run();
 
 

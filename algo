@@ -1,0 +1,56 @@
+3 + 5 * 2
+- On rentre dans compile()
+
+   + advance()
+
+      + on scanToken(): parser.current = TOKEN_NUMBER
+
+   + expression()
+
+      + parsePrecedence(PREC_ASSIGNEMENT)
+
+         + advance() : parser.current = TOKEN_PLUS; parser.previous = TOKEN_NUMBER
+	 + getRule(previous)->prefix : number()
+         + prefixRule() => number()
+
+	    + emitConstant(3) : Stack = [3.0]
+
+	 + while (TKN_ASSIGNEMENT <= current.type.precedence(PLUS))
+
+	    + advance(): current=NB; prev=PLUS
+	    + infixRule= getRule(PLUS) =  binary()
+            + binary()
+
+               + type=PLUS
+               + rule=getRule(PLUS)
+	       + parsePrec(PREC_TERM+1 (PREC_FACTOR))
+
+                  + advance() : current = MUL; prev = NB;
+                  + prefixRule() => number()
+
+		     + emitConstant(5) : Stack = [3.0][5.0]
+
+                  + while(PREC_FACTOR <= PREC_FACTOR)
+
+		     + advance(): current=NB;prev=MUL
+		     + infixRule= getRule(MUL) =  binary()
+
+	                + type=TOKEN_STAR
+                        + parsePrecedence(PREC_FACTOR+1[PREC_UNARY])
+
+
+			   + advance: current=EOF;prev=NB;
+			   + prefixRule() => number()
+
+			      + emitConstant(5) : Stack = [3.0][5.0][2.0]
+                           
+                           + while(PREC_UNARY <= PREC_NONE) => On ne rentre pas
+		        + Retour au précédent binary MUL
+                        + emitByte(OP_MUL)
+			   + writeChunk(*) : Stack = [3.0][5.0][2.0][OP_MUL]
+
+
+
+
+
+

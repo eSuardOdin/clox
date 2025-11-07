@@ -2,64 +2,82 @@
 #include "vm.h"
 #include "common.h"
 #include "debug.h"
+#include <stdlib.h>
+#include <stdio.h>
+
+static char* readFile(const char* path) {
+    printf("[main.c][readFile()] => Entering readFile()");
+    FILE* file = fopen(path, "rb");
+    if (file == NULL) {
+        fprintf(stderr, "Could not open file \"%s\".\n", path);
+        exit(74);
+    }
+
+    fseek(file, 0L, SEEK_END);
+    size_t fileSize = ftell(file);
+    rewind(file);
+
+    char* buffer = (char*)malloc(fileSize + 1);
+    if (buffer == NULL) {
+        fprintf(stderr, "Not enough memory to read \"%s\".\n", path);
+        exit(74);
+    }
+    size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
+    if (bytesRead < fileSize) {
+        fprintf(stderr, "Could not read file \"%s\".\n", path);
+        exit(74);
+    }
+    buffer[bytesRead] = '\0';
+
+    fclose(file);
+    return buffer;
+}
+
+static void repl() {
+    char line[REPL_LINE_CHARS];
+    while(1) {
+        printf(">  ");
+        if(!fgets(line, REPL_LINE_CHARS, stdin)) {
+            printf("\n");
+            break;
+        }
+
+        interpret(line);
+    }
+
+}
+
+static void runFile(const char* path) {
+    printf("[main.c][runFile()] => Entering runFile()");
+
+    char* source = readFile(path);
+    InterpretResult res = interpret(source);
+    free(source);
+
+    if(res == INTERPRET_RUNTIME_ERROR) {
+        exit(70);
+    }
+    else if(res == INTERPRET_COMPILE_ERROR) {
+        exit(65);
+    }
+}
+
+
 
 int main(int argc, char **argv)
 {
+    printf("[main.c][main()] => Entering main()");
+    
     initVM();
 
-    Chunk chunk;
-    initChunk(&chunk);
-    
-    // // --- 1 * 2 + 3 ---
-    // // 1 * 2 
-    // writeConstant(&chunk, 1.0, 1);
-    // writeConstant(&chunk, 2.0, 1);
-    // writeChunk(&chunk, OP_MULTIPLY, 1);
-    // // + 3
-    // writeConstant(&chunk, 3.0, 1);
-    // writeChunk(&chunk, OP_ADD, 1);
-    // writeChunk(&chunk, OP_RETURN, 1);
-
-
-
-    // // --- 1 + 2 * 3 ---
-    // // 2 * 3 
-    // writeConstant(&chunk, 2.0, 2);
-    // writeConstant(&chunk, 3.0, 2);
-    // writeChunk(&chunk, OP_MULTIPLY, 2);
-    // // + 1
-    // writeConstant(&chunk, 1.0, 2);
-    // writeChunk(&chunk, OP_ADD,2);
-    // writeChunk(&chunk, OP_RETURN, 2);
-
-    // --- 1 + 2 * 3 - 4 / -5 ---
-    writeConstant(&chunk, 2.0, 1);
-    //[2]
-    writeConstant(&chunk, 3.0, 1);
-    // [2][3]
-    writeChunk(&chunk, OP_MULTIPLY, 1);
-    // [6]
-
-    writeConstant(&chunk, 4.0, 1);
-    // [6][4]
-    writeConstant(&chunk, 5.0, 1);
-    // [6][4][5]
-    writeChunk(&chunk, OP_NEGATE, 1);
-    // [6][4][-5]
-    writeChunk(&chunk, OP_DIVIDE, 1);
-    // [6][-0.8]
-    writeChunk(&chunk, OP_SUBSTRACT, 1);
-    // [6.8]
-    writeConstant(&chunk, 1.0, 1);
-    // [6.8][1]
-    writeChunk(&chunk, OP_ADD, 1);
-    // [7.8]
-    writeChunk(&chunk, OP_RETURN, 1);
-    
-    disassembleChunk(&chunk, "main");
-    
-    interpret(&chunk);
-    freeChunk(&chunk);
+    if(argc == 1) {
+        repl();
+    } else if (argc == 2) {
+        runFile(argv[1]);
+    } else {
+        fprintf(stderr, "Usage: clox [path]\n");
+        exit(64);
+    }
 
     freeVM();    
     return 0;
