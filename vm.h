@@ -14,7 +14,7 @@ typedef struct {
     // Instruction Pointer (Program Counter)
     uint8_t* ip;
     // Stack to put operators/operandes in
-    Value stack[STACK_INIT];
+    Value* stack/*[STACK_INIT]*/;
     // Top a the Value stack (+1)
     Value* stackTop;
 } Vm;

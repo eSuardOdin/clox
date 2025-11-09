@@ -8,6 +8,9 @@ typedef enum {
     OP_CONSTANT,        // 2 bytes : 1 byte opcode & 1 byte Value  
     OP_CONSTANT_LONG,   // 4 bytes : 1 byte opcode & 3 byte Value
     OP_NEGATE,
+    OP_NIL,
+    OP_TRUE,
+    OP_FALSE,
     OP_ADD,
     OP_SUBSTRACT,
     OP_MULTIPLY,

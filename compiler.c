@@ -5,6 +5,7 @@
 #include "common.h"
 #include "chunk.h"
 #include "scanner.h"
+#include "value.h"
 
 #ifdef DEBUG_PRINT_CODE
 #include "debug.h"
@@ -77,8 +78,9 @@ static void advance() {
 
     while(1) {
         parser.current = scanToken();
-        if(parser.current.type != TOKEN_ERROR) break;
-
+        if(parser.current.type != TOKEN_ERROR) {
+            break;
+        }
         errorAtCurrent(parser.current.start);
     }
 }
@@ -106,8 +108,19 @@ static void emitReturn() {
     emitByte(OP_RETURN);
 }
 
-static void emitConstant(double v) {
-    writeConstant(currentChunk(), (Value)v, parser.previous.line);
+static uint8_t makeConstant(Value value) {
+    int constant = addConstant(currentChunk(), value);
+    if (constant > UINT8_MAX) {
+        error("Too many constants in one chunk.");
+        return 0;
+    }
+
+    return (uint8_t)constant;
+}
+
+static void emitConstant(Value value) {
+    emitBytes(OP_CONSTANT, makeConstant(value));
+    //writeConstant(currentChunk(), v, parser.previous.line); // Old code when using OP_CONSTANT_LONG
 }
 
 static void endCompiler() {
@@ -163,7 +176,7 @@ static void grouping() {
 
 static void number() {
     double value = strtod(parser.previous.start, NULL);
-    emitConstant(value);
+    emitConstant(NUMBER_VAL(value));
 }
 
 static void unary() {
@@ -195,6 +208,15 @@ static void binary() {
 }
 
 
+static void literal() {
+    switch (parser.previous.type) {
+        case TOKEN_NIL:     emitByte(OP_NIL); break;
+        case TOKEN_FALSE:   emitByte(OP_FALSE); break;
+        case TOKEN_TRUE:    emitByte(OP_TRUE); break;
+        default: return;
+    }
+}
+
 
 ParseRule rules[] = {
     [TOKEN_LEFT_PAREN]    = {grouping, NULL,   PREC_NONE},
@@ -222,17 +244,17 @@ ParseRule rules[] = {
     [TOKEN_AND]           = {NULL,     NULL,   PREC_NONE},
     [TOKEN_CLASS]         = {NULL,     NULL,   PREC_NONE},
     [TOKEN_ELSE]          = {NULL,     NULL,   PREC_NONE},
-    [TOKEN_FALSE]         = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_FALSE]         = {literal,  NULL,   PREC_NONE},
     [TOKEN_FOR]           = {NULL,     NULL,   PREC_NONE},
     [TOKEN_FUN]           = {NULL,     NULL,   PREC_NONE},
     [TOKEN_IF]            = {NULL,     NULL,   PREC_NONE},
-    [TOKEN_NIL]           = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_NIL]           = {literal,  NULL,   PREC_NONE},
     [TOKEN_OR]            = {NULL,     NULL,   PREC_NONE},
     [TOKEN_PRINT]         = {NULL,     NULL,   PREC_NONE},
     [TOKEN_RETURN]        = {NULL,     NULL,   PREC_NONE},
     [TOKEN_SUPER]         = {NULL,     NULL,   PREC_NONE},
     [TOKEN_THIS]          = {NULL,     NULL,   PREC_NONE},
-    [TOKEN_TRUE]          = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_TRUE]          = {literal,  NULL,   PREC_NONE},
     [TOKEN_VAR]           = {NULL,     NULL,   PREC_NONE},
     [TOKEN_WHILE]         = {NULL,     NULL,   PREC_NONE},
     [TOKEN_ERROR]         = {NULL,     NULL,   PREC_NONE},

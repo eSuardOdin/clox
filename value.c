@@ -39,5 +39,15 @@ void freeValueArray(ValueArray *va) {
 
 
 void printValue(Value value) {
-    printf("%g", value);    // Double shortest value
+    switch (value.type) {
+        case VAL_NUM:
+            printf("%g", AS_NUMBER(value));    // Double shortest value
+            break;
+        case VAL_BOOL:
+            printf("%s", value.as.boolean ? "true" : "false");
+            break;
+        case VAL_NIL:
+            printf("NIL");
+            break;
+    }
 }

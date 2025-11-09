@@ -6,7 +6,6 @@
 #include <stdio.h>
 
 static char* readFile(const char* path) {
-    printf("[main.c][readFile()] => Entering readFile()");
     FILE* file = fopen(path, "rb");
     if (file == NULL) {
         fprintf(stderr, "Could not open file \"%s\".\n", path);
@@ -48,7 +47,6 @@ static void repl() {
 }
 
 static void runFile(const char* path) {
-    printf("[main.c][runFile()] => Entering runFile()");
 
     char* source = readFile(path);
     InterpretResult res = interpret(source);
@@ -66,7 +64,6 @@ static void runFile(const char* path) {
 
 int main(int argc, char **argv)
 {
-    printf("[main.c][main()] => Entering main()");
     
     initVM();
 
